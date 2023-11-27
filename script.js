@@ -1,9 +1,9 @@
 
-/*
+/*************************************************************************************
 Skapa ett objekt som heter book
-*/
+*************************************************************************************/
 const book = {
-    title: "Some kind of book",
+    title: "Some kind of Book",
     author: "John Doe",
     genres: ["drama", "comedy", "sci-fi"],
     numberOfPages: 200,
@@ -23,9 +23,9 @@ console.log(book.title, book.numberOfPages, book.currentPage);
 book.turnPage();
 console.log(book.title, book.numberOfPages, book.currentPage);
 
-/*
+/*************************************************************************************
 Skapa objektet hund 
-*/
+*************************************************************************************/
 const dog = {
     name: "Benji",
     breed: "Border collie",
@@ -37,9 +37,10 @@ const dog = {
 console.log(dog.name, dog.breed);
 dog.bark();
 
-/*
+/*************************************************************************************
 Skapa objektet bil 
-*/
+*************************************************************************************/
+
 const car = {
     make: "Tesla",
     model: "Something",
@@ -66,9 +67,51 @@ car.getInfo();
 car.increaseSpeed(120);
 car.brake();
 
-/*
+// Inte i uppgiften, men... Testa med constructor-funktion också...
+function Car(make, model, year) {
+    this.make = make;
+    this.model = model;
+    this.year = year;
+    this.speed = 0;
+
+    this.getInfo = function() {
+        console.log(this.make + " CARINFO", this.make, this.model, this.year, this.speed);
+    }
+
+    this.increaseSpeed = function(newSpeed) {
+        for (let i = this.speed; i <= newSpeed; i = i + 5) {
+            this.speed = i;
+            console.log(this.make + " Accelerating: ", this.speed, newSpeed);
+        }
+    }
+
+    this.brake = function() {
+        for (let i = this.speed; i >= 0; i = i - 10) {
+            this.speed = i;
+            console.log(this.make + ": Stopping", this.speed, 0);
+        }
+    }
+}
+
+// Skapa bilobjekt
+const volvo = new Car("Volvo", "740", 1990);
+volvo.getInfo();
+//volvo.increaseSpeed(80);
+//volvo.brake();
+
+// Klona bilobjekt och ändra
+const saab = {};
+Object.assign(saab, volvo);
+saab.make = "Saab";
+saab.model = "Discontinued";
+saab.getInfo();
+//saab.increaseSpeed(60);
+//saab.brake();
+volvo.getInfo();
+
+/*************************************************************************************
     Person - objekt-properties
-*/
+*************************************************************************************/
 
 let person = {
     name: 'Sixten Faceplant',
@@ -82,9 +125,9 @@ let person = {
 }
 console.log(person.adress.street, person.adress.city);
 
-/*
+/*************************************************************************************
     KLONA TIDIGARE OBJEKT
-*/
+*************************************************************************************/
 
 // Bok
 let newBook = {};
@@ -111,9 +154,9 @@ const newPerson = {};
 Object.assign(newPerson, person);
 for (prop in newPerson) {
     if (typeof newPerson[prop] == "object") {
-        let tempObj = {};
-        Object.assign(tempObj, newPerson[prop]);
-        newPerson[prop] = tempObj;
+        let objectProperty = {};
+        Object.assign(objectProperty, newPerson[prop]);
+        newPerson[prop] = objectProperty;
     }
 }
 
@@ -122,7 +165,141 @@ newPerson.adress.city = "Ingalunda";
 newPerson.role = "Samurai";
 console.log("PEOPLE", person, newPerson);
 
-// Funktion med objekt
+/*************************************************************************************
+ Objekt som argument
+*************************************************************************************/
+
+displayBook(book);
+
+/*************************************************************************************
+Kortlek 
+*************************************************************************************/
+
+// Skapa
+const cardColors = ["Klöver", "Ruter", "Hjärter", "Spader"];
+const cardValues = [2, 3, 4, 5, 6, 7, 8, 9, 10, "Knekt", "Dam", "Kung", "Ess"];
+const deck = [];
+
+for (let colorIdx = 0; colorIdx < cardColors.length; colorIdx++) {
+    for (let valueIdx = 0; valueIdx < cardValues.length; valueIdx++) {
+        const card = {
+            suit: cardColors[colorIdx],
+            value: cardValues[valueIdx],
+            weight: valueIdx,
+            getSuitWeight: getCardSuitWeight
+        }
+        deck.push(card);
+    }
+}
+
+// Hämta 2 kort slumpmässigt och visa det högsta av de två
+let randCards = getRandomCards(deck, 2);
+let highestCard = getHighestCard(randCards[0], randCards[1]);
+addMessage(`Dragna kort: ${randCards[0].suit} ${randCards[0].value}, ${randCards[1].suit} ${randCards[1].value}`);
+addMessage(`Högsta kortet: ${highestCard.suit} ${highestCard.value}`);
+
+
+// Blanda
+const shuffled = getShuffledDeck(deck);
+displayDeck(deck, "Original", document.body);
+displayDeck(shuffled, "Blandad!", document.body);
+
+
+////////////////////////////////////////////////////////////////////////////
+// Metod i card-objekt som returnerar vikt-värde beroende på kortets färg
+function getCardSuitWeight() {
+    switch (this.suit) {
+        case "Klöver": return 1; break;
+        case "Ruter": return 2; break;
+        case "Hjärter": return 3; break;
+        case "Spader": return 4; break;
+    }
+    return 0;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Returnera högsta kortet av de angivna
+function getHighestCard(firstCard, secondCard) {
+    if (firstCard.weight > secondCard.weight) {
+        return firstCard;
+    }
+    else if (secondCard.weight > firstCard.weight) {
+        return secondCard;
+    }
+    else {
+        // Samma värde, kolla färg istället. 
+        if (firstCard.getSuitWeight() > secondCard.getSuitWeight()) {
+            console.log("SAME VALUE", `${firstCard.suit} is higher than ${secondCard.suit}`);
+            return firstCard;
+        }
+        else if (secondCard.getSuitWeight() > firstCard.getSuitWeight()) {
+            console.log("SAME VALUE", `${secondCard.suit} is higher than ${firstCard.suit}`);
+            return secondCard;
+        }
+    }
+
+    // Korten är identiska så spelar ingen roll vilket av dem som returneras...
+    return firstCard;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Välj numCards kort slumpmässigt från cardDeck
+function getRandomCards(cardDeck, numCards) {
+    const result = [];
+    for (let i = 1; i <= numCards; i++) {
+        let randIndex = Math.floor(Math.random() * cardDeck.length);
+
+        // Så vi inte får samma kort mer än en gång...
+        while (result.includes(cardDeck[randIndex])) {
+            randIndex = Math.floor(Math.random() * cardDeck.length);
+        }    
+
+        result.push(cardDeck[randIndex]);
+    }
+    return result;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Blanda kortleken och returnera en blandad kopia
+function getShuffledDeck(cardDeck) {
+    const shuffledDeck = [];
+    Object.assign(shuffledDeck, cardDeck);
+
+    for (let index = shuffledDeck.length-1; index > 0; index--) {
+        // Välj ett återstående kort (mellan 0 och nuvarande) slumpmässigt och byt dess plats med nuvarande kortet
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        const currentCard = shuffledDeck[index];
+        shuffledDeck[index] = shuffledDeck[randomIndex];
+        shuffledDeck[randomIndex] = currentCard;
+    }
+    return shuffledDeck;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Visa en kortlek på sidan
+function displayDeck(cardDeck, title, target) {
+    const deckDiv = document.createElement("div");
+    const deckH2 = document.createElement("h2");
+
+    deckH2.innerText = title;
+    deckDiv.classList.add("deckbox");
+    deckDiv.appendChild(deckH2);
+
+    for (const card of cardDeck) {
+        const cardDiv = document.createElement("div");
+        cardDiv.innerText = `${card.suit} ${card.value}`;
+        deckDiv.appendChild(cardDiv);
+    }
+
+    target.appendChild(deckDiv);
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Visar angivet bok-objekt på sidan
 function displayBook(theBook) {
     const newBook = document.createElement("div");
     const bookTitle = document.createElement("h2");
@@ -147,47 +324,8 @@ function displayBook(theBook) {
 
 }
 
-displayBook(book);
-
-/* 
-Kortlek 
-*/
-
-const cardColors = ["Hjärter", "Spader", "Ruter", "Klöver"];
-const cardValues = ["A", 2, 3, 4, 5, 6, 7, 8, 9, 10, "Kn", "D", "K"];
-const deck = [];
-
-for (let i = 0; i < cardColors.length; i++) {
-    for (let j = 0; j < cardValues.length; j++) {
-        const card = {
-            suit: cardColors[i],
-            value: cardValues[j]
-        }
-        deck.push(card);
-    }
+////////////////////////////////////////////////////////////////////////////
+// Lägg till text i meddelanderutan överst på sidan...
+function addMessage(message) {
+    document.querySelector("#output").innerHTML += `<div>${message}</div>`;
 }
-console.log("CARDS", deck);
-
-
-deck.sort(sortHelper);
-
-/*
-TODO:
-If the result is negative, a is sorted before b.
-If the result is positive, b is sorted before a.
-If the result is 0, no changes are done with the sort order of the two values.
-*/
-function sortHelper(a, b) {
-    // TODO: Math.random för att avgöra om det skall vara större eller mindre.
-    // return a.value - b.value;
-    const rnd = Math.floor(Math.random() * 3);
-    switch (rnd) {
-        case 0: return -1; break;
-        case 1: return 0; break;
-        case 2: return 1; break;
-    }
-}
-
-// TODO: Gör en gång till för Hjärter/Spader etc...
-
-console.log("SHUFFLED", deck);
